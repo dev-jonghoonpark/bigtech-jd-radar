@@ -99,9 +99,6 @@ td.n,th.n{text-align:right}
 .heat td.c{text-align:center;font:11.5px var(--mono);padding:6px 4px;min-width:54px;border:2px solid var(--panel);border-radius:4px}
 .heat th.co{text-align:center;writing-mode:initial}
 .heat td.sk{white-space:nowrap;font-size:12.5px}
-.status{display:inline-flex;align-items:center;gap:5px;font-size:12px}
-.status i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.ok i{background:#0ca30c} .err i{background:#d03b3b}
 .mini{display:flex;height:10px;border-radius:3px;overflow:hidden;gap:2px;min-width:140px}
 .mini span{display:block;height:100%}
 
@@ -207,10 +204,6 @@ svg text{fill:var(--ink-3);font:11px var(--mono)}
     <div class="pager"><span id="pageInfo"></span><button id="prev" type="button">이전</button><button id="next" type="button">다음</button></div>
   </section>
 
-  <section class="panel">
-    <div class="head"><h2>마지막 수집 상태</h2><p>사이트 응답이 비정상이면 해당 회사는 이전 데이터를 유지합니다.</p></div>
-    <div class="scroll"><table id="runs"></table></div>
-  </section>
 </div>
 <div id="tip" role="tooltip"></div>
 
@@ -290,7 +283,7 @@ function render() {
   $("#fTrack").value = st.track; $("#fLevel").value = st.level; $("#fDays").value = st.days;
   document.querySelectorAll("#catTabs .tab").forEach(b => b.setAttribute("aria-selected", b.dataset.c === st.cat));
   const list = base();
-  renderKpis(list); renderTop(list); renderRising(); renderHeat(); renderTrackMix(); renderLevels(list); renderTrend(); renderJobs(); renderRuns();
+  renderKpis(list); renderTop(list); renderRising(); renderHeat(); renderTrackMix(); renderLevels(list); renderTrend(); renderJobs();
 }
 
 function renderKpis(list) {
@@ -447,13 +440,6 @@ function renderJobs() {
   $("#prev").disabled = st.page === 0; $("#next").disabled = st.page >= pages - 1;
 }
 
-function renderRuns() {
-  $("#runs").innerHTML = `<thead><tr><th>회사</th><th>상태</th><th class="n">전체 공고</th><th class="n">대상 직무</th><th class="n">신규</th><th class="n">마감</th></tr></thead><tbody>` +
-    D.companies.map((c,i) => { const r = D.runs[i];
-      if (!r) return `<tr><td>${esc(c)}</td><td class="muted">기록 없음</td><td colspan="4"></td></tr>`;
-      return `<tr><td>${esc(c)}</td><td>${r.error ? `<span class="status err" data-tip="${esc(r.error)}"><i></i>실패</span>` : `<span class="status ok"><i></i>정상</span>`}</td><td class="n">${r.listed}</td><td class="n">${r.targets}</td><td class="n">${r.new}</td><td class="n">${r.closed}</td></tr>`;
-    }).join("") + `</tbody>`;
-}
 
 $("#stamp").innerHTML = `마지막 수집 ${esc(D.generated)}<br>공고 ${J.length.toLocaleString()}건 · 회차 ${D.dates.length}`;
 $("#version").innerHTML = VERSIONS.map((v, k) =>
