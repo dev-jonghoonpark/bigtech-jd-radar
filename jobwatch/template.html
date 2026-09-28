@@ -1,0 +1,465 @@
+<title>Big Tech JD Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --line:#e1e5ec; --line-2:#eef1f5;
+  --ink:#10151d; --ink-2:#4a5463; --ink-3:#7b8494;
+  --accent:#2a78d6; --accent-ink:#1c5cab; --accent-soft:#e3eefb;
+  --up:#1c5cab; --down:#c43c3b; --chip:#eef2f7;
+  --h0:#f0f3f7; --h1:#cde2fb; --h2:#9ec5f4; --h3:#6da7ec; --h4:#3987e5; --h5:#256abf; --h6:#184f95;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1116; --panel:#161a21; --line:#272d37; --line-2:#1e232b;
+    --ink:#eef1f5; --ink-2:#aab3c1; --ink-3:#7c8696;
+    --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#1a2a40;
+    --up:#6da7ec; --down:#e66767; --chip:#222834;
+    --h0:#1b2029; --h1:#15294a; --h2:#184f95; --h3:#256abf; --h4:#3987e5; --h5:#6da7ec; --h6:#9ec5f4;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1116; --panel:#161a21; --line:#272d37; --line-2:#1e232b;
+  --ink:#eef1f5; --ink-2:#aab3c1; --ink-3:#7c8696;
+  --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#1a2a40;
+  --up:#6da7ec; --down:#e66767; --chip:#222834;
+  --h0:#1b2029; --h1:#15294a; --h2:#184f95; --h3:#256abf; --h4:#3987e5; --h5:#6da7ec; --h6:#9ec5f4;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 64px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:26px;font-weight:700}
+h2{font-size:17px;font-weight:600}
+.num,td.n,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.eyebrow{font:500 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3)}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+header.top p{margin:6px 0 0;color:var(--ink-2);max-width:62ch}
+.stamp{font:12px var(--mono);color:var(--ink-3);text-align:right}
+
+/* 필터 바 */
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);
+  padding-block:10px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);font:500 12.5px var(--sans);padding:5px 10px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+select,input[type=search]{font:13px var(--sans);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+label.f{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.reset{appearance:none;border:0;background:none;color:var(--accent-ink);font:500 12.5px var(--sans);cursor:pointer;padding:4px}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+.panel .head p{margin:0;color:var(--ink-3);font-size:12.5px;max-width:70ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:22px}
+
+/* KPI 스트립 */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kpi{background:var(--panel);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kpi b{font:600 24px var(--mono);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--ink-3)}
+
+/* 막대 */
+.bars{display:flex;flex-direction:column;gap:5px}
+.bar{display:grid;grid-template-columns:minmax(110px,190px) 1fr 52px;align-items:center;gap:10px;font-size:13px}
+.bar .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .lab small{color:var(--ink-3);font-size:11px;margin-left:5px}
+.bar .track{height:14px;position:relative}
+.bar .fill{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:0 4px 4px 0;min-width:2px}
+.bar .v{font:12px var(--mono);text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.bar.click{cursor:pointer}
+.bar.click:hover .lab{color:var(--accent-ink)}
+.bar.sel .lab{color:var(--accent-ink);font-weight:600}
+/* 증감 막대 (0 기준 좌우) */
+.dbar{display:grid;grid-template-columns:minmax(110px,190px) 1fr 60px;align-items:center;gap:10px;font-size:13px}
+.dbar .track{height:14px;position:relative}
+.dbar .axis{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.dbar .fill{position:absolute;top:0;bottom:0}
+.dbar .fill.up{left:50%;background:var(--up);border-radius:0 4px 4px 0}
+.dbar .fill.down{right:50%;background:var(--down);border-radius:4px 0 0 4px}
+.dbar .v{font:12px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.dbar .v.up{color:var(--up)} .dbar .v.down{color:var(--down)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{appearance:none;border:1px solid var(--line);background:none;color:var(--ink-2);font:500 12px var(--sans);padding:4px 9px;border-radius:6px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--chip);color:var(--ink);border-color:var(--ink-3)}
+
+/* 표 */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line-2);vertical-align:top}
+td.n,th.n{text-align:right}
+.heat td.c{text-align:center;font:11.5px var(--mono);padding:6px 4px;min-width:54px;border:2px solid var(--panel);border-radius:4px}
+.heat th.co{text-align:center;writing-mode:initial}
+.heat td.sk{white-space:nowrap;font-size:12.5px}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:12px}
+.status i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ok i{background:#0ca30c} .err i{background:#d03b3b}
+.mini{display:flex;height:10px;border-radius:3px;overflow:hidden;gap:2px;min-width:140px}
+.mini span{display:block;height:100%}
+
+/* 공고 목록 */
+.jobs td.t a{color:var(--ink);text-decoration:none;font-weight:500}
+.jobs td.t a:hover{color:var(--accent-ink);text-decoration:underline}
+.jobs td.t .sub{color:var(--ink-3);font-size:12px;margin-top:2px}
+.tag{display:inline-block;font:500 11px var(--sans);background:var(--chip);color:var(--ink-2);padding:1px 7px;border-radius:4px;margin:2px 3px 0 0;white-space:nowrap}
+.tag.hit{background:var(--accent-soft);color:var(--accent-ink)}
+.pill{font:500 11px var(--mono);padding:2px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;color:var(--ink-2)}
+.pill.new{border-color:var(--accent);color:var(--accent-ink)}
+.pager{display:flex;gap:10px;align-items:center;justify-content:flex-end;font-size:12.5px;color:var(--ink-3)}
+.pager button{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer;font:12.5px var(--sans)}
+.pager button:disabled{opacity:.4;cursor:default}
+svg text{fill:var(--ink-3);font:11px var(--mono)}
+#tip{position:fixed;pointer-events:none;z-index:20;background:var(--ink);color:var(--bg);font:12px/1.4 var(--sans);padding:6px 9px;border-radius:6px;max-width:280px;opacity:0;transition:opacity .08s}
+.note{font-size:12.5px;color:var(--ink-3);margin:0}
+@media (max-width:560px){
+  .bar,.dbar{grid-template-columns:110px 1fr 48px}
+  h1{font-size:22px}
+  .jobs .hide-sm{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">MANGOS · FAANG · Oracle · Microsoft</div>
+      <h1>Big Tech JD Radar</h1>
+      <p>11개 빅테크의 Software Engineer · ML 채용공고를 모아 JD에서 기술 키워드를 뽑았습니다. 무엇을 준비해야 하는지, 어떤 기술이 새 공고에서 늘고 있는지 봅니다.</p>
+    </div>
+    <div class="stamp">
+      <label class="f" style="justify-content:flex-end">버전 <select id="version" aria-label="리포트 버전"></select></label>
+      <div id="stamp"></div>
+    </div>
+  </header>
+
+  <div class="filters" role="group" aria-label="필터">
+    <div class="chips" id="coChips"></div>
+    <label class="f">직무 <select id="fTrack"></select></label>
+    <label class="f">레벨 <select id="fLevel"></select></label>
+    <label class="f">게시 <select id="fDays">
+      <option value="0">전체</option><option value="7">7일</option><option value="30">30일</option><option value="90">90일</option>
+    </select></label>
+    <button class="reset" id="reset" type="button">초기화</button>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="head">
+        <h2>JD에 가장 많이 나오는 기술</h2>
+        <div class="tabs" id="catTabs" role="tablist"></div>
+      </div>
+      <p class="note">필터된 공고 중 해당 키워드가 JD에 나온 비율. 항목을 누르면 아래 공고 목록이 그 기술로 걸러집니다.</p>
+      <div class="bars" id="topSkills"></div>
+    </section>
+    <section class="panel">
+      <div class="head">
+        <h2>새 공고에서 늘어난 기술</h2>
+        <p id="risingNote"></p>
+      </div>
+      <p class="note">회사마다 (최근 60일 내 게시 공고의 등장률 − 그 이전에 게시되어 아직 열려 있는 공고의 등장률)을 구해 평균낸 값 (%p). 상시채용 공고와 비교하는 값이라 방향성으로만 보세요.</p>
+      <div class="bars" id="rising"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="head">
+      <h2>회사별 기술 지도</h2>
+      <p>회사마다 JD에 해당 기술이 나오는 비율. 진할수록 많이 요구합니다.</p>
+    </div>
+    <div class="scroll"><table class="heat" id="heat"></table></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="head"><h2>회사별 직무 구성</h2><p>막대에 올리면 비율</p></div>
+      <div class="scroll"><table id="trackMix"></table></div>
+    </section>
+    <section class="panel">
+      <div class="head"><h2>레벨과 요구 경력</h2><p>경력은 JD의 “N+ years” 중 최솟값</p></div>
+      <div class="scroll"><table id="levelMix"></table></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="head"><h2>수집 회차별 추이</h2><p id="trendNote"></p></div>
+    <div id="trend"></div>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <h2>공고 목록</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span class="tag hit" id="skillFilter" hidden></span>
+        <input type="search" id="q" placeholder="제목·지역 검색" aria-label="공고 검색">
+      </div>
+    </div>
+    <div class="scroll"><table class="jobs" id="jobs"></table></div>
+    <div class="pager"><span id="pageInfo"></span><button id="prev" type="button">이전</button><button id="next" type="button">다음</button></div>
+  </section>
+
+  <section class="panel">
+    <div class="head"><h2>마지막 수집 상태</h2><p>사이트 응답이 비정상이면 해당 회사는 이전 데이터를 유지합니다.</p></div>
+    <div class="scroll"><table id="runs"></table></div>
+  </section>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// 리포트 버전: reports/index.json 목록, 각 버전 데이터는 reports/<id>/data.json.gz
+async function loadData() {
+  const versions = await (await fetch("reports/index.json", {cache:"no-cache"})).json();
+  const want = decodeURIComponent(location.hash.slice(1));
+  const cur = versions.find(v => v.id === want) || versions[0];
+  const res = await fetch(`reports/${cur.id}/data.json.gz`);
+  const text = await new Response(res.body.pipeThrough(new DecompressionStream("gzip"))).text();
+  return [JSON.parse(text), versions, cur];
+}
+loadData().then(([d, versions, cur]) => main(d, versions, cur)).catch(e => {
+  document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+    `<p class="note">리포트 데이터를 불러오지 못했습니다: ${String(e.message || e).replace(/</g, "&lt;")}</p>`);
+});
+
+function main(D, VERSIONS, CUR) {
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct = (a, b) => b ? a / b * 100 : 0;
+const fmt = v => v >= 10 ? v.toFixed(0) : v.toFixed(1);
+const J = D.jobs.map(r => ({c:r[0], title:r[1], url:r[2], t:r[3], l:r[4], loc:r[5], posted:r[6], seen:r[7], yoe:r[8], sk:new Set(r[9]), hasDesc:r[10]}));
+const NOW = new Date(D.generated.slice(0,10));
+const ageDays = j => { const d = j.posted || j.seen; return d ? (NOW - new Date(d)) / 864e5 : 9999; };
+J.forEach(j => j.age = ageDays(j));
+const CATS = ["전체", ...[...new Set(D.skillCats)].filter(c => c !== "Degree"), "Degree"];
+
+let st = {cos:new Set(), track:-1, level:-1, days:0, cat:"전체", skill:-1, q:"", page:0};
+try { const s = JSON.parse(localStorage.getItem("jdradar") || "null"); if (s) { st = {...st, ...s, cos:new Set(s.cos || []), skill:-1, page:0}; } } catch (e) {}
+const save = () => { try { localStorage.setItem("jdradar", JSON.stringify({...st, cos:[...st.cos]})); } catch (e) {} };
+
+// ---------- 필터 UI
+$("#coChips").innerHTML = D.companies.map((c,i) => `<button class="chip" type="button" data-i="${i}" aria-pressed="false">${esc(c)}</button>`).join("");
+$("#fTrack").innerHTML = `<option value="-1">전체</option>` + D.tracks.map((t,i) => `<option value="${i}">${esc(t)}</option>`).join("");
+$("#fLevel").innerHTML = `<option value="-1">전체</option>` + D.levels.map((t,i) => `<option value="${i}">${esc(t)}</option>`).join("");
+$("#catTabs").innerHTML = CATS.map(c => `<button class="tab" type="button" role="tab" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+$("#coChips").onclick = e => { const b = e.target.closest(".chip"); if (!b) return; const i = +b.dataset.i; st.cos.has(i) ? st.cos.delete(i) : st.cos.add(i); st.page = 0; render(); };
+$("#fTrack").onchange = e => { st.track = +e.target.value; st.page = 0; render(); };
+$("#fLevel").onchange = e => { st.level = +e.target.value; st.page = 0; render(); };
+$("#fDays").onchange = e => { st.days = +e.target.value; st.page = 0; render(); };
+$("#catTabs").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; st.cat = b.dataset.c; render(); };
+$("#reset").onclick = () => { st = {cos:new Set(), track:-1, level:-1, days:0, cat:"전체", skill:-1, q:"", page:0}; $("#q").value = ""; render(); };
+$("#q").oninput = e => { st.q = e.target.value.trim().toLowerCase(); st.page = 0; renderJobs(); };
+$("#prev").onclick = () => { st.page--; renderJobs(); };
+$("#next").onclick = () => { st.page++; renderJobs(); };
+$("#skillFilter").onclick = () => { st.skill = -1; st.page = 0; render(); };
+
+// 툴팁
+const tip = $("#tip");
+document.addEventListener("mousemove", e => {
+  const el = e.target.closest("[data-tip]");
+  if (!el) { tip.style.opacity = 0; return; }
+  tip.innerHTML = el.dataset.tip; tip.style.opacity = 1;
+  const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8);
+  tip.style.left = x + "px"; tip.style.top = (e.clientY + 16) + "px";
+});
+
+function base({ignoreCo=false, ignoreDays=false} = {}) {
+  return J.filter(j =>
+    (ignoreCo || !st.cos.size || st.cos.has(j.c)) &&
+    (st.track < 0 || j.t === st.track) &&
+    (st.level < 0 || j.l === st.level) &&
+    (ignoreDays || !st.days || j.age <= st.days));
+}
+function skillCounts(list) {
+  const n = new Array(D.skills.length).fill(0);
+  for (const j of list) for (const s of j.sk) n[s]++;
+  return n;
+}
+const inCat = i => st.cat === "전체" ? D.skillCats[i] !== "Degree" : D.skillCats[i] === st.cat;
+
+function render() {
+  save();
+  document.querySelectorAll("#coChips .chip").forEach(b => b.setAttribute("aria-pressed", st.cos.has(+b.dataset.i)));
+  $("#fTrack").value = st.track; $("#fLevel").value = st.level; $("#fDays").value = st.days;
+  document.querySelectorAll("#catTabs .tab").forEach(b => b.setAttribute("aria-selected", b.dataset.c === st.cat));
+  const list = base();
+  renderKpis(list); renderTop(list); renderRising(); renderHeat(); renderTrackMix(); renderLevels(list); renderTrend(); renderJobs(); renderRuns();
+}
+
+function renderKpis(list) {
+  const n7 = list.filter(j => j.age <= 7).length;
+  const yoes = list.map(j => j.yoe).filter(v => v != null).sort((a,b) => a-b);
+  const med = yoes.length ? yoes[Math.floor(yoes.length/2)] : null;
+  const ml = list.filter(j => D.tracks[j.t].startsWith("ML/AI")).length;
+  const cos = new Set(list.map(j => j.c)).size;
+  $("#kpis").innerHTML = [
+    [list.length.toLocaleString(), "열린 공고"],
+    [n7.toLocaleString(), "최근 7일 게시"],
+    [fmt(pct(ml, list.length)) + "%", "ML/AI 직무 비중"],
+    [med != null ? med + "년" : "–", "요구 경력 중앙값"],
+    [cos, "회사"],
+  ].map(([v,l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("");
+}
+
+function renderTop(list) {
+  const n = skillCounts(list);
+  const rows = n.map((v,i) => [i,v]).filter(([i]) => inCat(i)).sort((a,b) => b[1]-a[1]).slice(0, 18);
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  $("#topSkills").innerHTML = rows.map(([i,v]) => {
+    const p = pct(v, list.length);
+    return `<div class="bar click ${st.skill===i?"sel":""}" data-s="${i}" data-tip="<b>${esc(D.skills[i])}</b><br>${v.toLocaleString()} / ${list.length.toLocaleString()} 공고 (${fmt(p)}%)">
+      <span class="lab">${esc(D.skills[i])}<small>${esc(D.skillCats[i])}</small></span>
+      <span class="track"><span class="fill" style="width:${v/max*100}%"></span></span>
+      <span class="v">${fmt(p)}%</span></div>`;
+  }).join("") || `<p class="note">해당 조건의 공고가 없습니다.</p>`;
+  $("#topSkills").onclick = e => { const b = e.target.closest(".bar"); if (!b) return; const s = +b.dataset.s; st.skill = st.skill === s ? -1 : s; st.page = 0; render(); $("#jobs").scrollIntoView({behavior:"smooth", block:"start"}); };
+}
+
+function renderRising() {
+  // 회사별로 (최근 − 이전) 등장률 차이를 구해 평균: 한 회사의 대량 채용이 전체를 끌고 가지 않도록
+  const all = base({ignoreDays:true});
+  const recent = all.filter(j => j.age <= 60), older = all.filter(j => j.age > 60);
+  const groups = D.companies.map((c,ci) => [recent.filter(j => j.c === ci), older.filter(j => j.c === ci)]).filter(([r,o]) => r.length >= 15 && o.length >= 15);
+  $("#risingNote").textContent = `최근 ${recent.length.toLocaleString()}건 vs 이전 ${older.length.toLocaleString()}건 · ${groups.length}개사 평균`;
+  if (!groups.length) { $("#rising").innerHTML = `<p class="note">비교할 공고가 부족합니다 (회사별로 최근·이전 각 15건 이상 필요).</p>`; return; }
+  const a = skillCounts(recent), b = skillCounts(older);
+  const gd = groups.map(([r,o]) => { const x = skillCounts(r), y = skillCounts(o); return x.map((v,i) => pct(v, r.length) - pct(y[i], o.length)); });
+  const d = a.map((v,i) => [i, gd.reduce((s,g) => s + g[i], 0) / gd.length, v]).filter(([i,,v]) => inCat(i) && (v + b[i]) >= 20);
+  d.sort((x,y) => y[1]-x[1]);
+  const rows = [...d.slice(0, 9), ...d.slice(-5).reverse()].filter((r,k,arr) => arr.findIndex(z => z[0]===r[0]) === k);
+  const max = Math.max(1, ...rows.map(r => Math.abs(r[1])));
+  $("#rising").innerHTML = rows.map(([i,v]) => {
+    const up = v >= 0, w = Math.abs(v)/max*50;
+    return `<div class="dbar" data-tip="<b>${esc(D.skills[i])}</b><br>최근 ${fmt(pct(a[i],recent.length))}% · 이전 ${fmt(pct(b[i],older.length))}%">
+      <span class="lab">${esc(D.skills[i])}</span>
+      <span class="track"><span class="axis"></span><span class="fill ${up?"up":"down"}" style="width:${w}%"></span></span>
+      <span class="v ${up?"up":"down"}">${up?"+":"−"}${Math.abs(v).toFixed(1)}</span></div>`;
+  }).join("");
+}
+
+function heatColor(p) {
+  const steps = ["--h0","--h1","--h2","--h3","--h4","--h5","--h6"];
+  const k = p <= 0 ? 0 : Math.min(6, 1 + Math.floor(p / 12));
+  return [`var(${steps[k]})`, k >= 4 ? "#fff" : "var(--ink)"];
+}
+function renderHeat() {
+  const list = base({ignoreCo:true});
+  const cols = D.companies.map((c,i) => ({i, c, jobs:list.filter(j => j.c === i)})).filter(x => x.jobs.length);
+  const n = skillCounts(list);
+  const rows = n.map((v,i) => [i,v]).filter(([i]) => inCat(i)).sort((a,b) => b[1]-a[1]).slice(0, 22);
+  const per = cols.map(col => skillCounts(col.jobs));
+  let h = `<thead><tr><th>기술</th>${cols.map(c => `<th class="co">${esc(c.c)}<br><span class="muted">${c.jobs.length}</span></th>`).join("")}</tr></thead><tbody>`;
+  for (const [s] of rows) {
+    h += `<tr><td class="sk">${esc(D.skills[s])}</td>` + cols.map((col,k) => {
+      const p = pct(per[k][s], col.jobs.length); const [bg, fg] = heatColor(p);
+      return `<td class="c" style="background:${bg};color:${fg}" data-tip="<b>${esc(col.c)}</b> · ${esc(D.skills[s])}<br>${per[k][s]} / ${col.jobs.length} 공고">${p ? Math.round(p) : "·"}</td>`;
+    }).join("") + `</tr>`;
+  }
+  $("#heat").innerHTML = h + `</tbody>`;
+}
+
+const TRACK_COLORS = ["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#008300","#4a3aa7","#e34948","#8a94a6","#c3c9d4"];
+function renderTrackMix() {
+  const list = base({ignoreCo:true});
+  const order = D.tracks.map((t,i) => i);
+  let h = `<thead><tr><th>회사</th><th class="n">공고</th><th>구성</th><th>최다 직무</th></tr></thead><tbody>`;
+  D.companies.forEach((c,ci) => {
+    const js = list.filter(j => j.c === ci); if (!js.length) return;
+    const cnt = order.map(t => js.filter(j => j.t === t).length);
+    const top = cnt.indexOf(Math.max(...cnt));
+    h += `<tr><td>${esc(c)}</td><td class="n">${js.length}</td><td><div class="mini">${order.map(t => cnt[t] ? `<span style="width:${pct(cnt[t],js.length)}%;background:${TRACK_COLORS[t]}" data-tip="${esc(D.tracks[t])}: ${cnt[t]} (${fmt(pct(cnt[t],js.length))}%)"></span>` : "").join("")}</div></td><td class="muted">${esc(D.tracks[top])} ${fmt(pct(cnt[top],js.length))}%</td></tr>`;
+  });
+  h += `</tbody><tfoot><tr><td colspan="4" style="border:0;padding-top:10px">${order.map(t => `<span class="tag"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${TRACK_COLORS[t]};margin-right:5px"></i>${esc(D.tracks[t])}</span>`).join("")}</td></tr></tfoot>`;
+  $("#trackMix").innerHTML = h;
+}
+
+function renderLevels(list) {
+  let h = `<thead><tr><th>레벨</th><th class="n">공고</th><th class="n">비율</th><th class="n">경력 중앙값</th><th class="n">PhD 언급</th></tr></thead><tbody>`;
+  const phd = D.skills.indexOf("PhD");
+  D.levels.forEach((l,li) => {
+    const js = list.filter(j => j.l === li); if (!js.length) return;
+    const y = js.map(j => j.yoe).filter(v => v != null).sort((a,b) => a-b);
+    h += `<tr><td>${esc(l)}</td><td class="n">${js.length}</td><td class="n">${fmt(pct(js.length,list.length))}%</td><td class="n">${y.length ? y[Math.floor(y.length/2)] + "년" : "–"}</td><td class="n">${fmt(pct(js.filter(j => j.sk.has(phd)).length, js.length))}%</td></tr>`;
+  });
+  $("#levelMix").innerHTML = h + `</tbody>`;
+}
+
+function renderTrend() {
+  const dates = D.dates;
+  if (dates.length < 2) {
+    $("#trendNote").textContent = "";
+    $("#trend").innerHTML = `<p class="note">수집 회차가 ${dates.length}번이라 아직 추이가 없습니다. 매일 수집이 쌓이면 여기서 기술별 등장률 변화를 볼 수 있습니다. 그 전까지는 위의 “새 공고에서 늘어난 기술”을 참고하세요.</p>`;
+    return;
+  }
+  const ok = s => (!st.cos.size || st.cos.has(s[1])) && (st.track < 0 || s[2] === st.track);
+  const tot = new Array(dates.length).fill(0), by = {};
+  for (const s of D.snaps) { if (!ok(s)) continue; if (s[3] < 0) tot[s[0]] += s[4]; else { (by[s[3]] ||= new Array(dates.length).fill(0))[s[0]] += s[4]; } }
+  const last = dates.length - 1;
+  const pick = Object.keys(by).map(Number).filter(inCat).sort((a,b) => by[b][last]-by[a][last]).slice(0, 6);
+  const W = 900, H = 260, L = 44, R = 150, T = 12, B = 26;
+  const ys = pick.map(s => by[s].map((v,k) => pct(v, tot[k])));
+  const ymax = Math.max(10, Math.ceil(Math.max(...ys.flat()) / 10) * 10);
+  const x = k => L + (W - L - R) * (dates.length === 1 ? 0 : k / (dates.length - 1));
+  const y = v => T + (H - T - B) * (1 - v / ymax);
+  const COL = ["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#008300"];
+  let g = "";
+  for (let v = 0; v <= ymax; v += ymax / 4) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${Math.round(v)}%</text>`;
+  const every = Math.ceil(dates.length / 8);
+  dates.forEach((d,k) => { if (k % every === 0 || k === last) g += `<text x="${x(k)}" y="${H-6}" text-anchor="middle">${d.slice(5)}</text>`; });
+  const labs = pick.map((s,i) => ({i, y:y(ys[i][last])})).sort((a,b) => a.y-b.y);
+  for (let k = 1; k < labs.length; k++) if (labs[k].y - labs[k-1].y < 14) labs[k].y = labs[k-1].y + 14;
+  pick.forEach((s,i) => {
+    g += `<polyline fill="none" stroke="${COL[i]}" stroke-width="2" stroke-linejoin="round" points="${ys[i].map((v,k) => `${x(k)},${y(v)}`).join(" ")}"/>`;
+    g += `<circle cx="${x(last)}" cy="${y(ys[i][last])}" r="4" fill="${COL[i]}" stroke="var(--panel)" stroke-width="2"/>`;
+    const ly = labs.find(l => l.i === i).y;
+    g += `<text x="${x(last)+10}" y="${ly+4}" style="fill:var(--ink-2)">${esc(D.skills[s])} ${ys[i][last].toFixed(0)}%</text>`;
+  });
+  $("#trendNote").textContent = `${dates[0]} ~ ${dates[last]} · ${dates.length}회`;
+  $("#trend").innerHTML = `<div class="scroll"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:560px" role="img" aria-label="기술별 등장률 추이">${g}</svg></div>`;
+}
+
+function renderJobs() {
+  const sf = $("#skillFilter");
+  sf.hidden = st.skill < 0; if (st.skill >= 0) sf.textContent = `${D.skills[st.skill]} ✕`;
+  let list = base();
+  if (st.skill >= 0) list = list.filter(j => j.sk.has(st.skill));
+  if (st.q) list = list.filter(j => (j.title + " " + j.loc + " " + D.companies[j.c]).toLowerCase().includes(st.q));
+  const PER = 50, pages = Math.max(1, Math.ceil(list.length / PER));
+  st.page = Math.max(0, Math.min(st.page, pages - 1));
+  const rows = list.slice(st.page * PER, st.page * PER + PER);
+  $("#jobs").innerHTML = `<thead><tr><th>회사</th><th>공고</th><th class="hide-sm">직무 · 레벨</th><th class="hide-sm">기술</th><th class="n">게시</th></tr></thead><tbody>` +
+    rows.map(j => {
+      const tags = [...j.sk].filter(s => D.skillCats[s] !== "Degree" && D.skillCats[s] !== "Practice").slice(0, 7);
+      return `<tr><td>${esc(D.companies[j.c])}</td>
+        <td class="t"><a href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.title)}</a><div class="sub">${esc(j.loc)}${j.yoe != null ? ` · ${j.yoe}년+` : ""}${j.hasDesc ? "" : " · JD 미수집"}</div></td>
+        <td class="hide-sm"><span class="tag">${esc(D.tracks[j.t])}</span><span class="tag">${esc(D.levels[j.l])}</span></td>
+        <td class="hide-sm">${tags.map(s => `<span class="tag ${s===st.skill?"hit":""}">${esc(D.skills[s])}</span>`).join("")}</td>
+        <td class="n"><span class="pill ${j.age <= 7 ? "new" : ""}">${esc(j.posted || j.seen)}</span></td></tr>`;
+    }).join("") + `</tbody>`;
+  $("#pageInfo").textContent = `${list.length.toLocaleString()}건 · ${st.page + 1}/${pages}`;
+  $("#prev").disabled = st.page === 0; $("#next").disabled = st.page >= pages - 1;
+}
+
+function renderRuns() {
+  $("#runs").innerHTML = `<thead><tr><th>회사</th><th>상태</th><th class="n">전체 공고</th><th class="n">대상 직무</th><th class="n">신규</th><th class="n">마감</th></tr></thead><tbody>` +
+    D.companies.map((c,i) => { const r = D.runs[i];
+      if (!r) return `<tr><td>${esc(c)}</td><td class="muted">기록 없음</td><td colspan="4"></td></tr>`;
+      return `<tr><td>${esc(c)}</td><td>${r.error ? `<span class="status err" data-tip="${esc(r.error)}"><i></i>실패</span>` : `<span class="status ok"><i></i>정상</span>`}</td><td class="n">${r.listed}</td><td class="n">${r.targets}</td><td class="n">${r.new}</td><td class="n">${r.closed}</td></tr>`;
+    }).join("") + `</tbody>`;
+}
+
+$("#stamp").innerHTML = `마지막 수집 ${esc(D.generated)}<br>공고 ${J.length.toLocaleString()}건 · 회차 ${D.dates.length}`;
+$("#version").innerHTML = VERSIONS.map((v, k) =>
+  `<option value="${esc(v.id)}">${esc(v.id)}${k === 0 ? " (최신)" : ""} · ${Number(v.jobs).toLocaleString()}건</option>`).join("");
+$("#version").value = CUR.id;
+$("#version").onchange = e => { location.hash = e.target.value; location.reload(); };
+render();
+}
+</script>

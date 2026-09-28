@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+# 로컬 상태: SQLite DB, Parquet, 로그
+data/
+# gh-pages 브랜치 worktree
+site/
