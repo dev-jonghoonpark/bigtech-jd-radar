@@ -28,7 +28,7 @@ def annotate(job: Job) -> dict:
     }
 
 
-def run_source(src: Source, known: dict[str, str], max_details: int | None) -> tuple[list[Job], int]:
+def run_source(src: Source, known: dict[str, str], max_details: int | None) -> tuple[list[Job], int, int]:
     t0 = time.time()
     listed = src.list_jobs()
     targets = [j for j in listed if is_target(j.title)]
@@ -42,11 +42,14 @@ def run_source(src: Source, known: dict[str, str], max_details: int | None) -> t
         need = need[:max_details]
     log.info("%s: listed=%d targets=%d need_detail=%d", src.company, len(listed), len(targets), len(need))
 
+    failed = []
+
     def detail(j):
         try:
             return src.fetch_detail(j)
-        except Exception as e:  # 상세 하나 실패해도 계속
+        except Exception as e:  # 상세 하나 실패해도 계속 (다음 수집 때 다시 시도)
             log.warning("%s detail %s 실패: %s", src.company, j.job_id, e)
+            failed.append(j.job_id)
             return j
 
     if isinstance(src, Meta):  # playwright sync API는 단일 스레드
@@ -59,10 +62,12 @@ def run_source(src: Source, known: dict[str, str], max_details: int | None) -> t
         with cf.ThreadPoolExecutor(src.detail_workers) as ex:
             list(ex.map(detail, need))
     log.info("%s: done in %.0fs", src.company, time.time() - t0)
-    return targets, len(listed)
+    return targets, len(listed), len(failed)
 
 
-def collect(db_path: str, only: list[str] | None = None, max_details: int | None = None) -> None:
+def collect(db_path: str, only: list[str] | None = None, max_details: int | None = None) -> list[str]:
+    """수집 후 문제 목록(사람이 읽을 문장)을 돌려준다. 비어 있으면 전부 정상."""
+    problems: list[str] = []
     conn = db.connect(db_path)
     known = db.known_descriptions(conn)
     today = date.today().isoformat()
@@ -73,9 +78,10 @@ def collect(db_path: str, only: list[str] | None = None, max_details: int | None
         for fut in cf.as_completed(futs):
             src = futs[fut]
             try:
-                targets, listed = fut.result()
+                targets, listed, detail_failed = fut.result()
             except Exception as e:
                 log.exception("%s 수집 실패", src.company)
+                problems.append(f"{src.company}: 수집 실패 — {e!r}"[:300] + " (이전 데이터 유지)")
                 conn.execute("INSERT INTO runs VALUES (?,?,?,?,?,?,?)", (today, src.company, 0, 0, 0, 0, repr(e)[:500]))
                 conn.commit()
                 continue
@@ -86,6 +92,13 @@ def collect(db_path: str, only: list[str] | None = None, max_details: int | None
             closed = 0
             if targets and len(targets) >= CLOSE_GUARD * prev_active:
                 closed = db.close_missing(conn, src.company, {j.key for j in targets}, today)
+            else:
+                problems.append(
+                    f"{src.company}: 대상 공고 {len(targets)}건으로 직전 {prev_active}건보다 크게 줄어 마감 처리를 건너뜀 "
+                    "(사이트 구조 변경 가능성)"
+                )
+            if detail_failed:
+                problems.append(f"{src.company}: JD 상세 {detail_failed}건 실패 (다음 수집 때 재시도)")
             conn.execute(
                 "INSERT INTO runs VALUES (?,?,?,?,?,?,?)", (today, src.company, listed, len(targets), new, closed, None)
             )
@@ -96,6 +109,7 @@ def collect(db_path: str, only: list[str] | None = None, max_details: int | None
     db.write_snapshot(conn, today)
     conn.commit()
     conn.close()
+    return problems
 
 
 _SENT = re.compile(r"\n+|(?<=[.!?])\s+(?=[A-Z])")

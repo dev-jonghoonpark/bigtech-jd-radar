@@ -6,10 +6,13 @@
 """
 import argparse
 import logging
+import sys
+from pathlib import Path
 
 from .collect import collect, reannotate
 
 DB = "data/jobs.db"
+FAILURES = "data/last_failures.md"
 
 
 def main():
@@ -28,8 +31,9 @@ def main():
         from .analytics import sql
 
         return sql(DB, a.query)
+    problems = []
     if a.cmd == "collect":
-        collect(DB, a.only, a.max_details)
+        problems = collect(DB, a.only, a.max_details)
         from .analytics import export_parquet
 
         export_parquet(DB)
@@ -38,6 +42,14 @@ def main():
     if a.cmd in ("collect", "report", "reannotate"):
         from .report import build
         build(DB, "site")
+    if a.cmd == "collect":
+        # publish.sh가 이 파일을 보고 알림(GitHub 이슈)을 만든다
+        Path(FAILURES).write_text("".join(f"- {p}\n" for p in problems))
+        print("\n=== 수집 결과: " + ("정상" if not problems else f"문제 {len(problems)}건"))
+        for p in problems:
+            print(f"  ! {p}")
+        if problems:
+            sys.exit(2)
 
 
 main()

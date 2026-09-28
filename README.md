@@ -3,16 +3,31 @@
 MANGOS(Meta, Anthropic, Nvidia, Google, OpenAI, SpaceX) + FAANG(Apple, Amazon, Netflix) + Oracle, Microsoft의
 Software Engineer / ML 채용공고를 모아, JD에서 기술 키워드를 뽑고 트렌드를 보는 도구.
 
-## 사용법
+대시보드: https://dev-jonghoonpark.github.io/bigtech-jd-radar/ (상단 “버전”에서 이전 리포트 보기)
+
+## 배포
 
 ```bash
-uv run python -m jobwatch collect            # 전체 수집 → data/jobs.db, site/index.html 갱신
+./publish.sh               # 수집 → 새 버전 리포트 생성 → gh-pages 푸시 (cron: 매일 07:00 KST)
+./publish.sh --no-collect  # 수집 없이 현재 DB로 리포트만 다시 배포
+```
+
+- `site/`는 `gh-pages` 브랜치의 git worktree. 리포트는 `site/reports/<날짜>/data.json.gz`로 쌓이고
+  `reports/index.json`이 버전 목록이다. 같은 날 재실행하면 그 날 버전을 덮어쓴다. 버전당 약 400KB(gzip).
+- 수집 중 문제가 있으면(회사 수집 실패, 공고 수 급감, JD 상세 실패) 터미널에 출력하고
+  이 레포에 **GitHub 이슈**를 연다. 종료 코드 2 = 일부 실패(리포트는 배포됨), 그 외 비 0 = 전체 실패(배포 안 함).
+- 로그: `data/logs/<날짜>.log` (30일 보관)
+
+## 개별 명령
+
+```bash
+uv run python -m jobwatch collect            # 전체 수집 → data/jobs.db, site/ 리포트 갱신
 uv run python -m jobwatch collect --only Meta Google
 uv run python -m jobwatch report             # DB에서 대시보드만 다시 생성
 uv run python -m jobwatch reannotate         # 분류 규칙/스킬 사전 수정 후 저장된 JD에 재적용
 ```
 
-대시보드: `site/index.html` (단일 파일, 브라우저로 열기)
+로컬에서 보기: `cd site && python3 -m http.server` → http://localhost:8000
 
 ## 구조
 
@@ -21,6 +36,7 @@ uv run python -m jobwatch reannotate         # 분류 규칙/스킬 사전 수�
 | `jobwatch/sources.py` | 회사별 수집기. 공식 채용 사이트의 공개 JSON 엔드포인트 사용 |
 | `jobwatch/classify.py` | 대상 직무 필터(제목 기준), 직무 트랙·레벨 분류, 요구 경력 추출 |
 | `jobwatch/skills.py` | 기술 키워드 사전 (카테고리 → 정규식). 여기에 추가하면 됨 |
+| `jobwatch/analytics.py` | DuckDB로 SQLite를 붙여 분석 (`python -m jobwatch sql "..."`), 수집마다 Parquet 스냅샷 |
 | `jobwatch/db.py` | SQLite: `jobs`(공고), `runs`(수집 이력), `snapshots`(회차별 스킬 등장 수) |
 | `jobwatch/report.py`, `template.html` | 대시보드 생성 |
 
